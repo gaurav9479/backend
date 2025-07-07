@@ -21,7 +21,7 @@ const registerUser=asyncHandler(async(req,res)=>{
     ){
         throw new ApiError(400,"all fields are required")
     }
-    const exsistedUSEr= User.findOne({
+    const exsistedUSEr= await User.findOne({
         $or:[{username},{email}]
     })
     if(exsistedUSEr){
@@ -37,7 +37,7 @@ const registerUser=asyncHandler(async(req,res)=>{
     if(!avatar){
         throw new ApiError(400,"kya kar rha hai bhai tu ")
     }
-    await User.create({
+    const user=await User.create({
         fullname,
         avatar:avatar.url,
         coverImage:coverImage?.url||"",
@@ -45,7 +45,7 @@ const registerUser=asyncHandler(async(req,res)=>{
         password,
         username:username.toLowerCase()
     })
-    const createduser=await User.findById(username._id).select(
+    const createduser=await User.findById(user._id).select(
         "-password -refreshToken"
     )
     if(!createduser){
