@@ -3,14 +3,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js"
 import { uploadOncloudinary } from "../utils/cloudinary.js"
 import { Apiresponse } from "../utils/Apiresponse.js";
-const generateAcessAndRefrestToken = async (userId) => {
+const generateAccessAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId)
-        const acessToken = user.generateAcessToken()
+        const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
         user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
-        return { acessToken, refreshToken }
+        return { accessToken, refreshToken }
     } catch (error) {
         throw new ApiError(500, "some went wrong while generating refres and acess token")
     }
@@ -90,7 +90,7 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!is_pass_valdi) {
         throw new ApiError(401, "Invalid user credential")
     }
-    const { acessToken, refreshToken } = await generateAcessAndRefrestToken(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
     const options = {
@@ -99,13 +99,14 @@ const loginUser = asyncHandler(async (req, res) => {
     }
     return res
         .status(200)
-        .cookie("accessToken", acessToken, options)
+        .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
         .json(
             new Apiresponse(
-                200, {
-                user: loggedInUser, acessToken, refreshToken
-            },
+                200,
+                {
+                user: loggedInUser, accessToken, refreshToken
+                },
                 "user logged in sucessfully"
             )
         )

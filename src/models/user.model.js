@@ -8,7 +8,7 @@ const userSchema=new Schema(
             type:String,
             required:true,
             unique:true,
-            lowecase:true,
+            lowercase:true,
             trim:true,
             index:true
 
@@ -17,7 +17,7 @@ const userSchema=new Schema(
             type:String,
             required:true,
             unique:true,
-            lowecase:true,
+            lowercase:true,
             trim:true,
             index:true
 
@@ -40,7 +40,7 @@ const userSchema=new Schema(
         watchHistory:[
             {
                 type:Schema.Types.ObjectId,
-                ref:"Vedio"
+                ref:"Video"
             }
         ],
         password:{
@@ -52,10 +52,11 @@ const userSchema=new Schema(
         }
 
 
-    },{timestamp:true}
+    },{timestamps:true}
 )
 userSchema.pre("save",async function(next){
     if(!this.isModified("password"))return next();
+    console.log("Passwords received", this.password, password)
     this.password=await bcrypt.hash(this.password,10)
     next()
 })
@@ -63,7 +64,7 @@ userSchema.methods.isPasswordCorrect=async function(password) {
     return await bcrypt.compare(password,this.password)
 }
 userSchema.methods.generateAccessToken=function(){
-    jwt.sign(
+    return jwt.sign(
         {
             _id:this._id,
             email:this.email,
@@ -76,8 +77,8 @@ userSchema.methods.generateAccessToken=function(){
         }
     )
 } 
-userSchema.methods.generateAccessToken=function(){
-    jwt.sign(
+userSchema.methods.generateRefreshToken=function(){
+    return jwt.sign(
         {
             _id:this._id,
         
